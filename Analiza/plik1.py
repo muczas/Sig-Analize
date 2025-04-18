@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import scipy.io.wavfile as wav
 from scipy.signal import find_peaks
 
-file_path = "serce.txt"
+file_path = "./Analiza/serce.txt"
 data = np.loadtxt(file_path, skiprows=1)  
 
 time = data[:, 0]

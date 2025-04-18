@@ -6,18 +6,19 @@ import matplotlib.pyplot as plt
 
 qrs_complexes = []
 
-for i in range(1, len(peaks)):
+for i in range(0, len(peaks)):
     r = peaks[i]
    
     
-    qrs_start = max(0, r - int(0.1 * sampling_rate))
-    qrs_end = min(len(ecgsignal), r + int(0.1 * sampling_rate))
+    qrs_start = max(0, r - int(0.05 * sampling_rate))
+    qrs_end = min(len(ecgsignal), r + int(0.05 * sampling_rate))
     qrs_segment = ecgsignal[qrs_start:qrs_end]
 
     qrs_peak, _ = find_peaks(qrs_segment, height=np.max(qrs_segment) * 0.6)
     if len(qrs_peak) > 0:
         qrs_complexes.append(qrs_start + qrs_peak[0])
-
+qrs_interval = time[qrs_end]-time[qrs_start]
+print(f"Czas trwania zespołu QRS: {round(qrs_interval,4)} s")
 print(f"Liczba wykrytych kompleksów QRS: {len(qrs_complexes)}")
 
 plt.figure(figsize=(10, 4))
