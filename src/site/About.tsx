@@ -11,7 +11,7 @@ const About = () => {
   return (
     <div className="bg-[#0d0f1a] text-white min-h-screen font-sans">
       <header className="flex items-center p-5">
-        <img src="logo.png" alt="logo" className="h-10 mr-3" />
+      <div className="text-pink-500 text-3xl">❤️</div>
         <h1 className="text-2xl font-bold">Sig&Analize</h1>
       </header>
 

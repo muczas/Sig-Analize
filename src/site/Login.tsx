@@ -2,7 +2,7 @@ import React from "react";
 
 export default function LoginForm() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] to-[#16213e] flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-r from-black to-indigo-900 flex flex-col items-center justify-center">
       {/* Logo & Title */}
       <div className="absolute top-6 left-6 flex items-center space-x-2">
         <div className="text-pink-500 text-3xl">❤️</div>

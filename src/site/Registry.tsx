@@ -34,8 +34,10 @@ const Register: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-800 to-pink-600">
       <div className="bg-gray-300 bg-opacity-30 p-8 rounded-3xl w-full max-w-md shadow-xl">
         <div className="flex items-center mb-6">
-          <img src="logo.png" alt="logo" className="h-12 mr-3" />
-          <h1 className="text-3xl font-bold text-white">Sig&Analize</h1>
+        <div className="text-pink-500 text-3xl">❤️</div>
+        <h1 className="text-white text-3xl font-bold">
+          Sig<span className="text-purple-400">&Analyze</span>
+        </h1>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

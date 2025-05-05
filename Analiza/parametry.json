@@ -1,0 +1,12 @@
+{
+    "Interwal R-R": [
+        0.75
+    ],
+    "HR": 80.0,
+    "Czas trwania za\u0142amka P": 0.1,
+    "liczba wykrytych za\u0142amk\u00f3w P": 1,
+    "Czas trwania za\u0142amka T": 0.0,
+    "Liczba wykrytych za\u0142amk\u00f3w T": 0,
+    "Czas trwania zespo\u0142u QRS": 0.096,
+    "Liczba wykrytych kompleks\u00f3w QRS": 2
+}

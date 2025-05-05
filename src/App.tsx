@@ -7,6 +7,7 @@ import Registry from "./site/Registry";
 import Signal from "./site/Signal";
 import Welcome from "./site/Welcome";
 import Nav from "./Nav";
+import Analize from"./site/Analize";
 
 function App() {  
   return (
@@ -18,7 +19,8 @@ function App() {
         <Route path="/avatar" element={<Avatar />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signal" element={<Signal />} />
-        <Route path="/about" element={<About />} /> {/* poprawka "abaut" → "about" */}
+        <Route path="/about" element={<About />} /> 
+        <Route path="/analize" element={<Analize />} />
       </Routes>
     </>
   );
