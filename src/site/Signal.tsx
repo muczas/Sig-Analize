@@ -76,7 +76,7 @@ function Signal() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="h-[89vh] bg-gray-100 flex items-center justify-center p4">
             <div className="bg-white shadow-xl rounded-2xl p-6 w-full max-w-4xl">
                 <h2 className="text-2xl font-semibold text-center mb-4">Wczytaj plik EKG (.txt lub .csv)</h2>
                 <div className="flex justify-center mb-6">
@@ -110,7 +110,7 @@ function Signal() {
                                     yaxis: { title: "Amplituda" },
                                     autosize: true,
                                 }}
-                                style={{ width: "100%", height: "400px" }}
+                                style={{ width: "100%", height: "390px" }}
                             />
                             <div className="flex justify-center mt-6">
                                 <button

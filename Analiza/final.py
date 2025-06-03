@@ -21,6 +21,12 @@ def analyze_ecg():
         # Normalizacja sygnału EKG
         ecgsignal_norm = ecgsignal / np.max(np.abs(ecgsignal))
 
+        # [DODANE] Energia sygnału
+        energy = float(np.sum(ecgsignal_norm ** 2))
+
+        # [DODANE] Amplituda sygnału
+        amplitude = float(np.max(ecgsignal) - np.min(ecgsignal))
+
         # Detekcja załamków R
         peaks, _ = find_peaks(ecgsignal, height=np.max(ecgsignal) * 0.6, distance=sampling_rate * 0.6)
         RR_intervals = np.diff(time[peaks])
@@ -71,6 +77,8 @@ def analyze_ecg():
 
         # Przygotowanie wyników
         results = {
+            "Energia sygnału": round(energy, 4),               # [DODANE]
+            "Amplituda": round(amplitude, 4),                  # [DODANE]
             "Interwały RR": RR_intervals.tolist(),
             "HR (Heart Rate)": round(HR, 2),
             "Czas trwania załamka P (s)": round(p_wave_duration, 4),

@@ -1,4 +1,8 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '/src/firebase.ts';
+import { doc, setDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 type Gender = 'Kobieta' | 'Mężczyzna';
 
@@ -11,6 +15,7 @@ interface FormData {
 }
 
 const Register: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
@@ -18,27 +23,50 @@ const Register: React.FC = () => {
     password: '',
     gender: '',
   });
-
+  
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Dane rejestracji:', formData);
-    // Tu możesz podpiąć zapytanie do backendu
-  };
+
+    try 
+    {
+      const userCredential = await createUserWithEmailAndPassword(
+       auth,
+       formData.email,
+       formData.password
+      );
+
+      const user = userCredential.user;
+
+     // Zapisz dane do Firestore
+      await setDoc(doc(db, "users", user.uid), {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      gender: formData.gender,
+      email: formData.email,
+      
+      createdAt: new Date()
+    
+    });
+
+    alert("Rejestracja zakończona sukcesem!");
+    navigate("/Login")
+  } 
+  catch (error) 
+  {
+    console.error("Błąd rejestracji:", error);
+    alert("Błąd rejestracji. Sprawdź dane.");
+  }
+};
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-800 to-pink-600">
+    <div className="h-[89vh] flex items-center justify-center bg-gradient-to-r from-black to-indigo-900 ">
       <div className="bg-gray-300 bg-opacity-30 p-8 rounded-3xl w-full max-w-md shadow-xl">
-        <div className="flex items-center mb-6">
-        <div className="text-pink-500 text-3xl">❤️</div>
-        <h1 className="text-white text-3xl font-bold">
-          Sig<span className="text-purple-400">&Analyze</span>
-        </h1>
-        </div>
+        
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex items-center bg-white rounded-full px-4 py-2">

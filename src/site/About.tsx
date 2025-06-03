@@ -9,11 +9,8 @@ const About = () => {
   };
 
   return (
-    <div className="bg-[#0d0f1a] text-white min-h-screen font-sans">
-      <header className="flex items-center p-5">
-      <div className="text-pink-500 text-3xl">❤️</div>
-        <h1 className="text-2xl font-bold">Sig&Analize</h1>
-      </header>
+    <div className="bg-[#0d0f1a] text-white h-[89vh] font-sans">
+     
 
       <div className="absolute top-5 right-5">
         <div
@@ -33,7 +30,7 @@ const About = () => {
               <img src="plus_icon.png" alt="Dodaj" className="w-6 mr-2" />
               Dodaj sygnał
             </Link>
-            <Link to="/profile" className="flex items-center bg-white bg-opacity-20 rounded-xl px-4 py-2 hover:bg-opacity-40">
+            <Link to="/Avatar" className="flex items-center bg-white bg-opacity-20 rounded-xl px-4 py-2 hover:bg-opacity-40">
               <img src="profile_icon.png" alt="Profil" className="w-6 mr-2" />
               Mój profil
             </Link>
