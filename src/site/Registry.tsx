@@ -3,6 +3,8 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '/src/firebase.ts';
 import { doc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import { sendEmailVerification } from "firebase/auth";
+import { Link } from "react-router-dom";
 
 type Gender = 'Kobieta' | 'Mężczyzna';
 
@@ -41,6 +43,11 @@ const Register: React.FC = () => {
       );
 
       const user = userCredential.user;
+      
+      if (user) {
+        await sendEmailVerification(user);
+      }
+
 
      // Zapisz dane do Firestore
       await setDoc(doc(db, "users", user.uid), {
@@ -53,13 +60,13 @@ const Register: React.FC = () => {
     
     });
 
-    alert("Rejestracja zakończona sukcesem!");
+    alert("Registration was succesful!");
     navigate("/Login")
   } 
   catch (error) 
   {
-    console.error("Błąd rejestracji:", error);
-    alert("Błąd rejestracji. Sprawdź dane.");
+    console.error("Registration error:", error);
+    alert("Registration error, check parameters");
   }
 };
 
@@ -70,11 +77,11 @@ const Register: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex items-center bg-white rounded-full px-4 py-2">
-            <img src="user_icon.png" alt="user" className="w-6 h-6 mr-3" />
+            <img src="src\site\id-card.png" alt="user" className="w-6 h-6 mr-3" />
             <input
               type="text"
               name="firstName"
-              placeholder="Imię"
+              placeholder="Name"
               value={formData.firstName}
               onChange={handleChange}
               className="outline-none w-full"
@@ -83,11 +90,11 @@ const Register: React.FC = () => {
           </div>
 
           <div className="flex items-center bg-white rounded-full px-4 py-2">
-            <img src="user_icon.png" alt="user" className="w-6 h-6 mr-3" />
+            <img src="src\site\id-card.png" alt="user" className="w-6 h-6 mr-3" />
             <input
               type="text"
               name="lastName"
-              placeholder="Nazwisko"
+              placeholder="Surname"
               value={formData.lastName}
               onChange={handleChange}
               className="outline-none w-full"
@@ -96,7 +103,7 @@ const Register: React.FC = () => {
           </div>
 
           <div className="flex items-center bg-white rounded-full px-4 py-2">
-            <img src="email_icon.png" alt="email" className="w-6 h-6 mr-3" />
+            <img src="src\site\mail.png" alt="email" className="w-6 h-6 mr-3" />
             <input
               type="email"
               name="email"
@@ -109,11 +116,11 @@ const Register: React.FC = () => {
           </div>
 
           <div className="flex items-center bg-white rounded-full px-4 py-2">
-            <img src="lock_icon.png" alt="password" className="w-6 h-6 mr-3" />
+            <img src="src\site\padlock.png" alt="password" className="w-6 h-6 mr-3" />
             <input
               type="password"
               name="password"
-              placeholder="Hasło"
+              placeholder="Password"
               value={formData.password}
               onChange={handleChange}
               className="outline-none w-full"
@@ -132,7 +139,7 @@ const Register: React.FC = () => {
                 className="mr-2"
                 required
               />
-              Kobieta
+              Female
             </label>
             <label className="flex items-center">
               <input
@@ -143,17 +150,25 @@ const Register: React.FC = () => {
                 onChange={handleChange}
                 className="mr-2"
               />
-              Mężczyzna
+              Male
             </label>
           </div>
 
           <button
             type="submit"
-            className="bg-gradient-to-r from-purple-700 to-pink-500 text-white font-bold py-3 rounded-full text-lg mt-6 hover:scale-105 transition"
+            className="bg-gradient-to-r from-purple-500 to-pink-500 w-full py-2 rounded-full text-white font-bold text-lg block text-cente"
           >
-            Rejestruj
+            Register
           </button>
         </form>
+        <div className="mt-6">
+          <Link
+             to="/Welcome"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 w-full py-2 rounded-full text-white font-bold text-lg block text-center"
+            >
+              Come back to main page
+          </Link>
+        </div>
       </div>
     </div>
   );

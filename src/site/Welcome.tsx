@@ -4,7 +4,7 @@ import serce from "./serce.png";
 
 function Welcome() {
   return (
-    <div className="h-[89vh] bg-gradient-to-r from-black to-indigo-900 text-white px-4 sm:px-8 lg:px-16 py-6 flex flex-col">
+    <div className="h-[100vh] bg-gradient-to-r from-black to-indigo-900 text-white px-4 sm:px-8 lg:px-16 py-6 flex flex-col">
       
       
       {/* Główna zawartość */}
@@ -12,8 +12,8 @@ function Welcome() {
         {/* LEWA KOLUMNA: TEKST + PRZYCISKI */}
         <div className="flex-1 w-full text-center lg:text-left">
           <h2 className="text-3xl sm:text-4xl md:text-6xl font-extrabold font-mono leading-tight mb-6">
-            Słuchaj <span className="text-purple-400">głosu</span><br />
-            swojego <span className="text-purple-400">serca!</span>
+            Your <span className="text-purple-400">Heart</span><br />
+            Your <span className="text-purple-400">signal!</span>
           </h2>
 
           <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
@@ -21,13 +21,13 @@ function Welcome() {
               to="/Login"
               className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 text-white font-semibold py-3 px-6 rounded-full transition w-full sm:w-auto text-center"
             >
-              Logowanie
+              Log in
             </Link>
             <Link
               to="/registry"
               className="bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90 text-white font-semibold py-3 px-6 rounded-full transition w-full sm:w-auto text-center"
             >
-              Rejestracja
+              Register
             </Link>
           </div>
         </div>

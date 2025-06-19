@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "/src/firebase.ts";
 import { useNavigate } from "react-router-dom"; // ⬅️ dodane
+import { Link } from "react-router-dom";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -13,16 +14,22 @@ export default function LoginForm() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      console.log("Zalogowano:", user);
+
+      if (!user.emailVerified) {
+        alert("You need to authorize your e-mail, before login.");
+        return;
+      }
+
+      console.log("loged in:", user);
       navigate("/About"); 
     } catch (error: any) {
-      console.error("Błąd logowania:", error.message);
-      alert("Błąd logowania: " + error.message);
+      console.error("Log in error:", error.message);
+      alert("Log IN error: " + error.message);
     }
   };
 
   return (
-    <div className="h-[89vh] bg-gradient-to-r from-black to-indigo-900 flex flex-col items-center justify-center">
+    <div className="h-[94vh] bg-gradient-to-r from-black to-indigo-900 flex flex-col items-center justify-center">
 
 
       {/* Card */}
@@ -72,7 +79,7 @@ export default function LoginForm() {
             </svg>
             <input
               type="password"
-              placeholder="Hasło"
+              placeholder="Password"
               className="bg-transparent focus:outline-none w-full"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -82,11 +89,19 @@ export default function LoginForm() {
 
           <button
             type="submit"
-            className="bg-gradient-to-r from-purple-500 to-pink-500 w-full py-2 rounded-full text-white font-bold text-lg"
+            className="bg-gradient-to-r from-purple-500 to-pink-500 w-full py-2 rounded-full text-white font-bold text-lg md-4"
           >
-            Zaloguj
+            Log In
           </button>
         </form>
+        <div className="mt-6">
+          <Link
+             to="/Welcome"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 w-full py-2 rounded-full text-white font-bold text-lg block text-center"
+            >
+              Come back to main page
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -1,79 +1,195 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { auth, db } from "../firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Avatar() {
   const [user, setUser] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    password: "",
-    gender: ""
+    gender: "",
+    bio: "",
+    accountType: "",
+    signalsCount: 0,
+    lastAnalysisDate: "",
   });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [bioInput, setBioInput] = useState("");
+  const [accountTypeInput, setAccountTypeInput] = useState("");
+  const navigate = useNavigate();
 
-  // Funkcje obsługujące zdarzenia
-  const handleLogout = () => {
-    alert("Zostałeś wylogowany!");
-    // Tutaj możesz dodać logikę wylogowania
-  };
+  const toggleMenu = () => setMenuOpen(!menuOpen);
 
-  const handleReturnToAnalysis = () => {
-    alert("Powrót do analizy!");
-    // Tutaj możesz dodać logikę przekierowania lub innej akcji
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const docRef = doc(db, "users", currentUser.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setUser({
+            firstName: data.firstName || "",
+            lastName: data.lastName || "",
+            email: data.email || currentUser.email,
+            gender: data.gender || "",
+            bio: data.bio || "",
+            accountType: data.accountType || "",
+            signalsCount: data.signalsCount || 0,
+            lastAnalysisDate: data.lastAnalysisDate || "",
+          });
+          setBioInput(data.bio || "");
+          setAccountTypeInput(data.accountType || "");
+        }
+      }
+    };
+    fetchUserData();
+  }, []);
+
+  const handleSave = async () => {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const docRef = doc(db, "users", currentUser.uid);
+      await updateDoc(docRef, {
+        bio: bioInput,
+        accountType: accountTypeInput,
+      });
+      setUser((prev) => ({ ...prev, bio: bioInput, accountType: accountTypeInput }));
+      setEditMode(false);
+    }
   };
 
   return (
-<div className="h-[89vh] bg-gradient-to-r from-black to-indigo-900 flex flex-col items-center justify-center ">
-      <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center lg:items-start lg:justify-between space-y-8 lg:space-y-0 px-4">
-        {/* Sidebar Profile */}
-        <div className="text-white flex flex-col items-center">
-          <div className="w-40 h-40 bg-white rounded-full flex items-center justify-center text-black text-5xl">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-20 h-20"
-            >
-              <path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-            </svg>
-          </div>
-          <div className="text-lg lg:text-2xl font-bold text-center">
-            {user.firstName || user.lastName ? `${user.firstName} ${user.lastName}` : ""}
+    <div className="bg-gradient-to-b from-[#0d0f1a] via-[#1f2233] to-[#0d0f1a] text-white min-h-screen font-sans relative overflow-x-hidden px-4">
+      {/* Menu */}
+      <div className="fixed top-5 right-5 z-50">
+        <div
+          className="bg-white rounded-full w-14 h-14 flex items-center justify-center cursor-pointer shadow-lg"
+          onClick={toggleMenu}
+        >
+          <div className="flex flex-col gap-1">
+            <div className="w-7 h-1 bg-[#0d0f1a] rounded"></div>
+            <div className="w-7 h-1 bg-[#0d0f1a] rounded"></div>
+            <div className="w-7 h-1 bg-[#0d0f1a] rounded"></div>
           </div>
         </div>
 
-        {/* Info Card */}
-        <div className="bg-white/20 backdrop-blur-sm text-white p-6 rounded-3xl space-y-3 w-full max-w-lg">
-          <div>
-            <strong>Imię:</strong> {user.firstName}
+        {menuOpen && (
+          <div className="absolute top-20 right-0 w-64 sm:w-72 bg-gradient-to-r from-purple-700 to-pink-500 rounded-2xl p-6 flex flex-col gap-4 shadow-xl z-50">
+            <Link to="/signal" className="flex items-center bg-white bg-opacity-20 rounded-xl px-5 py-3 text-base font-medium hover:bg-opacity-40 transition">
+              <img src="src/site/heart-rate.png" alt="Add" className="w-6 h-6 mr-3" />
+              Add Signal
+            </Link>
+            <Link to="/About" className="flex items-center bg-white bg-opacity-20 rounded-xl px-5 py-3 text-base font-medium hover:bg-opacity-40 transition">
+              <img src="src/site/welcome-back.png" alt="About" className="w-6 h-6 mr-3" />
+              About us
+            </Link>
           </div>
-          <div>
-            <strong>Nazwisko:</strong> {user.lastName}
-          </div>
-          <div>
-            <strong>Email:</strong> {user.email}
-          </div>
-          <div>
-            <strong>Hasło:</strong> {user.password}
-          </div>
-          <div>
-            <strong>Płeć:</strong> {user.gender}
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Buttons */}
-      <div className="absolute bottom-4 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-        <button
-          onClick={handleLogout}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full font-bold w-full sm:w-auto"
-        >
-          Wyloguj
-        </button>
-        <button
-          onClick={handleReturnToAnalysis}
-          className="bg-gradient-to-r from-purple-400 to-pink-400 text-white px-6 py-2 rounded-full font-bold w-full sm:w-auto"
-        >
-          Wróć do analizy
-        </button>
+      <div className="flex flex-col items-center justify-start pt-32 sm:pt-40 max-w-4xl mx-auto space-y-8">
+        {/* Avatar Info */}
+        <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+          <img
+            src="src/site/3177440.png"
+            alt="Avatar"
+            className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-purple-500 shadow-md"
+          />
+          <div>
+            <h1 className="text-3xl font-bold">{user.firstName} {user.lastName}</h1>
+            <p className="text-sm text-gray-300">{user.email}</p>
+          </div>
+        </div>
+
+        {/* User Info Card */}
+        <div className="bg-white/20 backdrop-blur-sm p-6 rounded-3xl w-full space-y-4">
+          <div><strong>Name:</strong> {user.firstName}</div>
+          <div><strong>Surname:</strong> {user.lastName}</div>
+          <div><strong>Email:</strong> {user.email}</div>
+          <div><strong>Gender:</strong> {user.gender}</div>
+          <div>
+            <strong>Bio:</strong>
+            {editMode ? (
+              <textarea
+                value={bioInput}
+                onChange={(e) => setBioInput(e.target.value)}
+                className="w-full mt-1 p-2 rounded-lg text-black"
+              />
+            ) : (
+              <span className="ml-2">{user.bio || "–"}</span>
+            )}
+          </div>
+          <div>
+            <strong>Account type:</strong>
+            {editMode ? (
+              <select
+                value={accountTypeInput}
+                onChange={(e) => setAccountTypeInput(e.target.value)}
+                className="w-full mt-1 p-2 rounded-lg text-black"
+              >
+                <option value="">Choose...</option>
+                <option value="student">Student</option>
+                <option value="lekarz">Doctor</option>
+                <option value="zainteresowany">Interested</option>
+              </select>
+            ) : (
+              <span className="ml-2 capitalize">{user.accountType || "–"}</span>
+            )}
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+          <div className="bg-purple-300 text-purple-900 text-center rounded-2xl py-10 px-6 shadow-lg text-2xl font-bold">
+            <p className="text-6xl">{user.signalsCount}</p>
+            <p className="text-lg mt-2">Sent Signals</p>
+          </div>
+          <div className="bg-pink-300 text-pink-900 text-center rounded-2xl py-10 px-6 shadow-lg text-2xl font-bold">
+            <p className="text-3xl">{user.lastAnalysisDate || "–"}</p>
+            <p className="text-lg mt-2">Last Analysis</p>
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6 w-full">
+          {editMode ? (
+            <>
+              <button
+                onClick={handleSave}
+                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90 text-white font-semibold py-3 px-6 rounded-full transition w-full sm:w-auto"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setEditMode(false)}
+                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90 text-white font-semibold py-3 px-6 rounded-full transition w-full sm:w-auto"
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setEditMode(true)}
+                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90 text-white font-semibold py-3 px-6 rounded-full transition w-full sm:w-auto"
+              >
+                Edit
+              </button>
+              <button
+                onClick={async () => {
+                  await auth.signOut();
+                  navigate("/");
+                }}
+                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90 text-white font-semibold py-3 px-6 rounded-full transition w-full sm:w-auto"
+              >
+                Log out
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import numpy as np
 from scipy.signal import find_peaks
+from scipy.ndimage import gaussian_filter1d
 
 app = Flask(__name__)
 CORS(app)
@@ -9,84 +10,69 @@ CORS(app)
 @app.route('/analyze-ecg', methods=['POST'])
 def analyze_ecg():
     try:
-        # Wczytanie danych z żądania
         content = request.json
         ecg_data = content['ecg_data']
         sampling_rate = content['sampling_rate']
 
-        # Konwersja danych do tablicy numpy
         time = np.array(ecg_data['time'])
-        ecgsignal = np.array(ecg_data['signal'])
+        signal = np.array(ecg_data['signal'])
 
-        # Normalizacja sygnału EKG
-        ecgsignal_norm = ecgsignal / np.max(np.abs(ecgsignal))
-
-        # [DODANE] Energia sygnału
-        energy = float(np.sum(ecgsignal_norm ** 2))
-
-        # [DODANE] Amplituda sygnału
-        amplitude = float(np.max(ecgsignal) - np.min(ecgsignal))
+        # Wygładzenie i normalizacja
+        smoothed = gaussian_filter1d(signal, sigma=2)
+        normalized = smoothed / np.max(np.abs(smoothed))
 
         # Detekcja załamków R
-        peaks, _ = find_peaks(ecgsignal, height=np.max(ecgsignal) * 0.6, distance=sampling_rate * 0.6)
-        RR_intervals = np.diff(time[peaks])
-        HR = 60 / np.mean(RR_intervals)  # Obliczanie tętna (HR)
+        r_peaks, _ = find_peaks(
+            normalized,
+            height=0.5,
+            distance=int(0.6 * sampling_rate)
+        )
 
-        # Detekcja załamków P
+        rr_intervals = np.diff(time[r_peaks])
+        mean_rr = np.mean(rr_intervals) if len(rr_intervals) > 1 else 0
+        hr = 60 / mean_rr if mean_rr > 0 else 0
+
+        # Energia i amplituda
+        energy = float(np.sum(normalized ** 2))
+        amplitude = float(np.max(signal) - np.min(signal))
+
+        # Detekcja załamków P – szukanie maksimum w oknie przed R
         p_waves = []
-        p_wave_duration = 0.0
-        for i in range(1, len(peaks)):
-            r = peaks[i]
-            p_start = max(0, r - int(0.3 * sampling_rate))
-            p_end = max(0, r - int(0.1 * sampling_rate))
-            p_segment = ecgsignal[p_start:p_end]
+        for r in r_peaks:
+            start = max(0, r - int(0.2 * sampling_rate))
+            end = max(0, r - int(0.08 * sampling_rate))
+            if end <= start:
+                continue
+            segment = normalized[start:end]
+            if len(segment) > 0:
+                peak_index = np.argmax(segment)
+                p_waves.append(start + peak_index)
+        p_wave_duration = 0.08 if p_waves else 0.0
 
-            if len(p_segment) > 0:
-                p_local, _ = find_peaks(p_segment, height=np.max(p_segment) * 0.4)
-                if len(p_local) > 0:
-                    p_waves.append(p_start + p_local[-1])
-                    p_wave_duration = (p_end - p_start) / sampling_rate
-
-        # Detekcja załamków T
+        # Detekcja załamków T – szukanie maksimum w oknie po R
         t_waves = []
-        t_wave_duration = 0.0
-        for i in range(1, len(peaks)):
-            r = peaks[i]
-            t_start = min(len(ecgsignal), r + int(0.1 * sampling_rate))
-            t_end = min(len(ecgsignal), r + int(0.4 * sampling_rate))
-            t_segment = ecgsignal[t_start:t_end]
+        for r in r_peaks:
+            start = r + int(0.12 * sampling_rate)
+            end = r + int(0.4 * sampling_rate)
+            if end >= len(normalized) or start >= len(normalized):
+                continue
+            segment = normalized[start:end]
+            if len(segment) > 0:
+                peak_index = np.argmax(segment)
+                t_waves.append(start + peak_index)
+        t_wave_duration = 0.12 if t_waves else 0.0
 
-            if len(t_segment) > 0:
-                t_local, _ = find_peaks(t_segment, height=np.max(t_segment) * 0.3)
-                if len(t_local) > 0:
-                    t_waves.append(t_start + t_local[0])
-                    t_wave_duration = (t_end - t_start) / sampling_rate
-
-        # Detekcja zespołów QRS
-        qrs_complexes = []
-        qrs_duration = 0.0
-        for r in peaks:
-            qrs_start = max(0, r - int(0.05 * sampling_rate))
-            qrs_end = min(len(ecgsignal), r + int(0.05 * sampling_rate))
-            qrs_segment = ecgsignal[qrs_start:qrs_end]
-
-            qrs_peak, _ = find_peaks(qrs_segment, height=np.max(qrs_segment) * 0.6)
-            if len(qrs_peak) > 0:
-                qrs_complexes.append(qrs_start + qrs_peak[0])
-                qrs_duration = (qrs_end - qrs_start) / sampling_rate
-
-        # Przygotowanie wyników
         results = {
-            "Energia sygnału": round(energy, 4),               # [DODANE]
-            "Amplituda": round(amplitude, 4),                  # [DODANE]
-            "Interwały RR": RR_intervals.tolist(),
-            "HR (Heart Rate)": round(HR, 2),
-            "Czas trwania załamka P (s)": round(p_wave_duration, 4),
-            "Liczba załamków P": len(p_waves),
-            "Czas trwania załamka T (s)": round(t_wave_duration, 4),
-            "Liczba załamków T": len(t_waves),
-            "Czas trwania QRS (s)": round(qrs_duration, 4),
-            "Liczba QRS": len(qrs_complexes),
+            "Amplitude": round(amplitude, 4),
+            "Signal Energy": round(energy, 4),
+            "HR (Heart Rate)": round(hr, 2),
+            "Mean RR Interval": round(mean_rr, 4),
+            "Number of QRS Complexes": len(r_peaks),
+            "QRS Duration (s)": 0.1 if len(r_peaks) > 0 else 0.0,
+            "Number of P Waves": len(p_waves),
+            "P Wave Duration (s)": round(p_wave_duration, 4),
+            "Number of T Waves": len(t_waves),
+            "T Wave Duration (s)": round(t_wave_duration, 4)
         }
 
         return jsonify(results)

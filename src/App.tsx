@@ -21,6 +21,8 @@ function App() {
         <Route path="/signal" element={<Signal />} />
         <Route path="/about" element={<About />} /> 
         <Route path="/analize" element={<Analize />} />
+        <Route path="/welcome" element={<Welcome />} />
+
       </Routes>
     </>
   );
